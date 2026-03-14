@@ -63,4 +63,70 @@
  */
 export function validateForm(formData) {
   // Your code here
+
+  let res = {
+    isValid: true,
+    errors: {},
+  };
+
+  if (
+    !formData.name ||
+    typeof formData.name !== "string" ||
+    formData.name.trim().length < 2 ||
+    formData.name.trim().length > 50
+  ) {
+    res.errors.name = "Name must be 2-50 characters";
+    res.isValid = false;
+  }
+
+  if (
+    !formData.email ||
+    typeof formData.email !== "string" ||
+    formData.email.indexOf("@") == -1 ||
+    formData.email.indexOf("@") !== formData.email.lastIndexOf("@") ||
+    formData.email.indexOf("@") > formData.email.lastIndexOf(".")
+  ) {
+    res.errors.email = "Invalid email format";
+    res.isValid = false;
+  }
+
+  if (
+    !formData.phone ||
+    typeof formData.phone !== "string" ||
+    formData.phone.length !== 10 ||
+    !["6", "7", "8", "9"].some((c) => c === formData.phone[0]) ||
+    [...formData.phone].some((c) => c < "0" || c > "9")
+  ) {
+    res.errors.phone = "Invalid Indian phone number";
+    res.isValid = false;
+  }
+
+  let age =
+    typeof formData.age === "string" ? parseInt(formData.age) : formData.age;
+  if (!Number.isInteger(age) || age < 16 || age > 100) {
+    res.errors.age = "Age must be an integer between 16 and 100";
+    res.isValid = false;
+  }
+
+  if (
+    !formData.pincode ||
+    typeof formData.pincode !== "string" ||
+    formData.pincode.length !== 6 ||
+    formData.pincode[0] === "0" ||
+    [...formData.pincode].some((c) => c < "0" || c > "9")
+  ) {
+    res.errors.pincode = "Invalid Indian pincode";
+    res.isValid = false;
+  }
+
+  if (!formData.state?.trim()) {
+    res.errors.state = "State is required";
+    res.isValid = false;
+  }
+
+  if (!formData.agreeTerms) {
+    res.errors.agreeTerms = "Must agree to terms";
+    res.isValid = false;
+  }
+  return res;
 }

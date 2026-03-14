@@ -48,4 +48,68 @@
  */
 export function analyzeUPITransactions(transactions) {
   // Your code here
+  if (!Array.isArray(transactions) || transactions.length === 0) return null;
+  transactions = transactions.filter(
+    (t) =>
+      Number.isFinite(t.amount) &&
+      t.amount > 0 &&
+      (t.type === "credit" || t.type === "debit"),
+  );
+
+  if (transactions.length === 0) return null;
+
+  let reducedObj = transactions.reduce(
+    (prev, curr) => {
+      curr.type === "credit"
+        ? (prev["totalCredit"] += curr.amount)
+        : (prev["totalDebit"] += curr.amount);
+      prev.amounts.push(curr.amount);
+      curr.to in prev.frequentContact
+        ? (prev.frequentContact[curr.to] += 1)
+        : (prev.frequentContact[curr.to] = 1);
+      curr.category in prev.categoryBreakdown
+        ? (prev.categoryBreakdown[curr.category] += curr.amount)
+        : (prev.categoryBreakdown[curr.category] = curr.amount);
+
+      return prev;
+    },
+    {
+      totalCredit: 0,
+      totalDebit: 0,
+      amounts: [],
+      categoryBreakdown: {},
+      frequentContact: {},
+    },
+  );
+  
+  let totalCredit = reducedObj.totalCredit;
+  let totalDebit = reducedObj.totalDebit;
+  let netBalance = totalCredit - totalDebit;
+  let transactionCount = transactions.length;
+  let avgTransaction = Math.round(
+    (totalCredit + totalDebit) / transactionCount,
+  );
+  let maxAmount = Math.max(...reducedObj.amounts);
+  let highestTransaction = transactions.find((value) => value.amount === maxAmount);
+  let categoryBreakdown = reducedObj.categoryBreakdown;
+
+  let frequentContact = Object.entries(reducedObj.frequentContact).sort(
+    (a, b) => b[1] - a[1],
+  )[0][0];
+
+  let allAbove100 = reducedObj.amounts.every((a) => a > 100);
+  let hasLargeTransaction = reducedObj.amounts.some((a) => a >= 5000);
+
+  return {
+    totalCredit,
+    totalDebit,
+    netBalance,
+    transactionCount,
+    avgTransaction,
+    highestTransaction,
+    categoryBreakdown,
+    frequentContact,
+    allAbove100,
+    hasLargeTransaction,
+  };
 }
